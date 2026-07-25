@@ -1,0 +1,6 @@
+{
+  "name": "Lemonade Onboarding Flow",
+  "description": "Exact page layouts and framings for the Lemonade Insurance onboarding flow with AI Maya, interactive coverage calculators, mobile framing, and screen flow navigator.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
