@@ -1,6 +1,6 @@
 {
-  "name": "Lemonade Onboarding Flow",
-  "description": "Exact page layouts and framings for the Lemonade Insurance onboarding flow with AI Maya, interactive coverage calculators, mobile framing, and screen flow navigator.",
+  "name": "ComplyKE - Kenya AI Compliance Platform",
+  "description": "Mobile-first AI business compliance platform for Kenyan entrepreneurs to manage KRA, SHA, NSSF, county permits, document vaults, M-PESA payments, and legal tax optimization.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

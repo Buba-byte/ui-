@@ -1,200 +1,146 @@
-import React from 'react';
-import { ViewMode, DeviceFrame } from '../types';
-import { 
-  Sparkles, 
-  Grid3X3, 
-  Smartphone, 
-  Palette, 
-  MessageCircle, 
-  RotateCcw, 
-  ChevronRight,
-  Layers,
-  ShieldAlert
-} from 'lucide-react';
+import React, { useState } from 'react';
+import { BusinessProfile, DeviceFrame, NotificationItem } from '../types';
+import { Bell, ShieldCheck, Smartphone, Monitor, ChevronDown, CheckCircle2 } from 'lucide-react';
 
 interface HeaderProps {
-  currentStep: number;
-  totalSteps: number;
-  viewMode: ViewMode;
-  setViewMode: (mode: ViewMode) => void;
+  activeProfile: BusinessProfile;
+  profiles: BusinessProfile[];
+  onSelectProfile: (profile: BusinessProfile) => void;
   deviceFrame: DeviceFrame;
   setDeviceFrame: (frame: DeviceFrame) => void;
-  onOpenMayaChat: () => void;
-  onReset: () => void;
-  onJumpToStep: (step: number) => void;
-  productTitle: string;
+  notifications: NotificationItem[];
+  onToggleNotifications: () => void;
+  isNotificationOpen: boolean;
+  score: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  currentStep,
-  totalSteps,
-  viewMode,
-  setViewMode,
+  activeProfile,
+  profiles,
+  onSelectProfile,
   deviceFrame,
   setDeviceFrame,
-  onOpenMayaChat,
-  onReset,
-  onJumpToStep,
-  productTitle
+  notifications,
+  onToggleNotifications,
+  isNotificationOpen,
+  score,
 }) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
   return (
-    <header className="sticky top-0 z-40 bg-slate-900 text-white border-b border-slate-800 shadow-md">
-      {/* Top Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Brand Logo & App Tag */}
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-2 bg-gradient-to-r from-[#FF0083] to-pink-600 px-3.5 py-1.5 rounded-full font-bold text-white tracking-tight shadow-sm cursor-pointer" onClick={() => onJumpToStep(1)}>
-            <span className="text-xl italic font-serif tracking-tight">Lemonade</span>
-            <span className="text-[10px] uppercase font-sans tracking-widest bg-white/20 px-1.5 py-0.5 rounded text-white">Flow</span>
+    <header className="bg-slate-900 text-white border-b border-slate-800 px-4 py-3 sticky top-0 z-50">
+      <div className="max-w-5xl mx-auto flex items-center justify-between">
+        {/* Brand & Active Business Selector */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500 flex items-center justify-center text-slate-950 font-extrabold text-base shadow-sm">
+              C
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5 leading-tight">
+                <span className="font-bold text-base tracking-tight text-white">ComplyKE</span>
+                <span className="text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-1.5 py-0.5 rounded-full font-medium">
+                  🇰🇪 Kenya
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-400">AI Business Operating System</p>
+            </div>
           </div>
 
-          <div className="hidden md:flex items-center space-x-2 text-xs text-slate-400 border-l border-slate-700 pl-3">
-            <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Onboarding Architecture UI</span>
+          {/* Business Switcher Pill */}
+          <div className="relative ml-2">
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs py-1.5 px-2.5 rounded-lg border border-slate-700 transition"
+            >
+              <span className="font-medium truncate max-w-[130px] sm:max-w-[200px]">
+                {activeProfile.name}
+              </span>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            </button>
+
+            {isDropdownOpen && (
+              <div className="absolute left-0 mt-2 w-64 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 p-1.5 text-xs">
+                <div className="px-2 py-1 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                  Select Business
+                </div>
+                {profiles.map((p) => {
+                  const isSelected = p.id === activeProfile.id;
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => {
+                        onSelectProfile(p);
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between p-2 rounded-lg text-left transition ${
+                        isSelected
+                          ? 'bg-emerald-950 text-emerald-300 font-medium'
+                          : 'text-slate-200 hover:bg-slate-700'
+                      }`}
+                    >
+                      <div className="truncate pr-2">
+                        <div className="font-medium text-white truncate">{p.name}</div>
+                        <div className="text-[10px] text-slate-400 truncate">{p.industry}</div>
+                      </div>
+                      {isSelected && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* View Mode Tabs */}
-        <div className="flex items-center space-x-1 bg-slate-800/90 p-1 rounded-xl border border-slate-700/80">
+        {/* Action Controls: Notifications & View Frame Toggle */}
+        <div className="flex items-center gap-2">
+          {/* Compliance Status Badge */}
+          <div className="hidden md:flex items-center gap-1.5 bg-emerald-950/80 border border-emerald-700/60 text-emerald-300 text-xs px-2.5 py-1 rounded-full">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{score}% Score</span>
+          </div>
+
+          {/* Device Frame View Mode Switcher */}
+          <div className="hidden sm:flex bg-slate-800 p-0.5 rounded-lg border border-slate-700">
+            <button
+              onClick={() => setDeviceFrame('iphone16')}
+              title="Mobile App Frame"
+              className={`p-1.5 rounded-md transition ${
+                deviceFrame === 'iphone16' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Smartphone className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setDeviceFrame('fullscreen')}
+              title="Full Screen Canvas"
+              className={`p-1.5 rounded-md transition ${
+                deviceFrame === 'fullscreen' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Monitor className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Notifications Toggle Button */}
           <button
-            onClick={() => setViewMode('interactive')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              viewMode === 'interactive'
-                ? 'bg-[#FF0083] text-white shadow-sm'
-                : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
+            onClick={onToggleNotifications}
+            className={`relative p-2 rounded-lg transition border ${
+              isNotificationOpen
+                ? 'bg-emerald-900 border-emerald-600 text-white'
+                : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700'
             }`}
           >
-            <Smartphone className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Interactive Flow</span>
-            <span className="sm:hidden">Flow</span>
-          </button>
-
-          <button
-            onClick={() => setViewMode('blueprint')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              viewMode === 'blueprint'
-                ? 'bg-[#FF0083] text-white shadow-sm'
-                : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-            }`}
-          >
-            <Grid3X3 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Framing Blueprint</span>
-            <span className="sm:hidden">Blueprint</span>
-          </button>
-
-          <button
-            onClick={() => setViewMode('design-system')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              viewMode === 'design-system'
-                ? 'bg-[#FF0083] text-white shadow-sm'
-                : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-            }`}
-          >
-            <Palette className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Design System</span>
-            <span className="sm:hidden">Design</span>
-          </button>
-        </div>
-
-        {/* Actions & AI Maya Button */}
-        <div className="flex items-center space-x-2">
-          {/* Quick AI Maya Button */}
-          <button
-            onClick={onOpenMayaChat}
-            className="flex items-center space-x-2 bg-pink-950/60 hover:bg-pink-900/80 text-pink-300 border border-pink-700/50 px-3 py-1.5 rounded-full text-xs font-semibold transition-all shadow-sm hover:scale-105"
-          >
-            <div className="w-5 h-5 rounded-full bg-[#FF0083] flex items-center justify-center text-white font-bold text-[10px]">
-              M
-            </div>
-            <span className="hidden sm:inline">Ask AI Maya</span>
-            <Sparkles className="w-3.5 h-3.5 text-pink-400" />
-          </button>
-
-          {/* Device Frame Dropdown (Only in Interactive mode) */}
-          {viewMode === 'interactive' && (
-            <div className="hidden lg:flex items-center space-x-1 bg-slate-800 p-1 rounded-lg border border-slate-700 text-xs">
-              <button
-                onClick={() => setDeviceFrame('iphone16')}
-                className={`px-2 py-1 rounded transition-colors ${
-                  deviceFrame === 'iphone16' ? 'bg-slate-700 text-white font-medium' : 'text-slate-400 hover:text-slate-200'
-                }`}
-                title="iPhone Frame"
-              >
-                iPhone
-              </button>
-              <button
-                onClick={() => setDeviceFrame('android')}
-                className={`px-2 py-1 rounded transition-colors ${
-                  deviceFrame === 'android' ? 'bg-slate-700 text-white font-medium' : 'text-slate-400 hover:text-slate-200'
-                }`}
-                title="Android Frame"
-              >
-                Android
-              </button>
-              <button
-                onClick={() => setDeviceFrame('borderless')}
-                className={`px-2 py-1 rounded transition-colors ${
-                  deviceFrame === 'borderless' ? 'bg-slate-700 text-white font-medium' : 'text-slate-400 hover:text-slate-200'
-                }`}
-                title="Full Responsive"
-              >
-                Full Width
-              </button>
-            </div>
-          )}
-
-          {/* Reset Flow Button */}
-          <button
-            onClick={onReset}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-            title="Reset Flow"
-          >
-            <RotateCcw className="w-4 h-4" />
+            <Bell className="w-4 h-4" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-amber-500 text-slate-950 text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                {unreadCount}
+              </span>
+            )}
           </button>
         </div>
       </div>
-
-      {/* Interactive Progress Bar & Quick Step Selector Sub-bar */}
-      {viewMode === 'interactive' && (
-        <div className="bg-slate-950 border-t border-slate-800/80 px-4 py-2">
-          <div className="max-w-7xl mx-auto flex items-center justify-between text-xs text-slate-300">
-            {/* Step Navigation Dropdown */}
-            <div className="flex items-center space-x-2">
-              <span className="text-slate-400">Layout Frame:</span>
-              <select
-                value={currentStep}
-                onChange={(e) => onJumpToStep(Number(e.target.value))}
-                className="bg-slate-800 text-white font-medium px-2.5 py-1 rounded-lg border border-slate-700 focus:outline-none focus:ring-1 focus:ring-[#FF0083] text-xs"
-              >
-                <option value={1}>Frame 1: Product Pick & Landing</option>
-                <option value={2}>Frame 2: Personal Identity</option>
-                <option value={3}>Frame 3: Property Address & Pinpoint Map</option>
-                <option value={4}>Frame 4: Household & Living Details</option>
-                <option value={5}>Frame 5: Safety Systems & Discounts</option>
-                <option value={6}>Frame 6: High-Value Items & Tech</option>
-                <option value={7}>Frame 7: Interactive Coverage Sliders</option>
-                <option value={8}>Frame 8: Lemonade Giveback Cause</option>
-                <option value={9}>Frame 9: AI Risk Quote & Sign</option>
-              </select>
-
-              <span className="hidden md:inline-block text-slate-500 font-mono text-[11px]">
-                ({productTitle})
-              </span>
-            </div>
-
-            {/* Step Counter */}
-            <div className="flex items-center space-x-3">
-              <span className="font-semibold text-pink-400">Step {currentStep} of {totalSteps}</span>
-              <div className="w-24 sm:w-36 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-[#FF0083] transition-all duration-300 rounded-full"
-                  style={{ width: `${(currentStep / totalSteps) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </header>
   );
 };
